@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoSiMarket - Зоотовары с заботой</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo">
+                        <span class="logo-gosi">GoSi</span>
+                        <span class="logo-market">Market</span>
+                    </a>
+                    <span class="logo-badge">TEST</span>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Что ищет ваш питомец?">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                
+                <div class="user-actions">
+                    <button class="icon-btn" id="filterToggleBtn">
+                        <i class="fas fa-sliders-h"></i>
+                        <span class="badge" id="filterActiveBadge" style="display: none;">•</span>
+                    </button>
+                    <button class="icon-btn" id="favoritesBtn">
+                        <i class="far fa-heart"></i>
+                        <span class="badge" id="favoritesCount">0</span>
+                    </button>
+                    <button class="icon-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge" id="cartCount">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Категории и кнопка обновления -->
+    <nav class="categories-nav">
+        <div class="container">
+            <div class="nav-wrapper">
+                <ul id="categoriesList">
+                    <li data-category="all" class="active">🏠 Все</li>
+                </ul>
+                <button id="refreshBtn" class="refresh-btn-nav">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Фильтры (скрытая панель) -->
+    <div class="filter-drawer" id="filterDrawer">
+        <div class="filter-drawer-header">
+            <h3><i class="fas fa-sliders-h"></i> Фильтры</h3>
+            <button class="close-filter" id="closeFilterBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="filter-drawer-content">
+            <div class="filter-section">
+                <h4>Цена</h4>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" placeholder="От" value="0" min="0">
+                    <span>—</span>
+                    <input type="number" id="maxPrice" placeholder="До" value="10000" min="0">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>Рейтинг</h4>
+                <select id="ratingFilter">
+                    <option value="0">Любой</option>
+                    <option value="4">От 4 ★</option>
+                    <option value="4.5">От 4.5 ★</option>
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <h4>Наличие</h4>
+                <label class="filter-checkbox">
+                    <input type="checkbox" id="inStockFilter">
+                    <span>Только в наличии</span>
+                </label>
+            </div>
+
+            <div class="filter-section">
+                <h4>Скидки</h4>
+                <label class="filter-checkbox">
+                    <input type="checkbox" id="saleFilter">
+                    <span>Со скидкой</span>
+                </label>
+            </div>
+
+            <div class="filter-section">
+                <h4>Сортировка</h4>
+                <select id="sortSelect">
+                    <option value="default">По умолчанию</option>
+                    <option value="price_asc">Цена (по возрастанию)</option>
+                    <option value="price_desc">Цена (по убыванию)</option>
+                    <option value="rating_desc">По рейтингу</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button id="applyFilterBtn" class="primary-btn">Применить</button>
+                <button id="resetFilterBtn" class="secondary-btn">Сбросить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Оверлей -->
+    <div class="filter-overlay" id="filterOverlay"></div>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <!-- Активные фильтры -->
+        <div class="active-filters" id="activeFilters"></div>
+
+        <!-- Товары -->
+        <div class="products-grid" id="productsGrid">
+            <div class="loading">Загрузка товаров...</div>
+        </div>
+    </main>
+
+    <!-- Модальное окно корзины -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shopping-cart"></i> Корзина</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="cartContent">
+                <p style="text-align: center;">Корзина пуста</p>
+            </div>
+            <div class="modal-footer">
+                <span class="cart-total" id="cartTotal">Итого: 0 ₽</span>
+                <button class="primary-btn" id="checkoutBtn">Оформить заказ</button>
+                <button class="secondary-btn" id="clearCartBtn">Очистить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно избранного -->
+    <div id="favoritesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="far fa-heart"></i> Избранное</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="favoritesContent">
+                <p style="text-align: center;">Избранное пусто</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно оформления заказа -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-truck"></i> Оформление заказа</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="checkoutForm" class="checkout-form">
+                    <div class="form-section">
+                        <h3>Контактная информация</h3>
+                        <div class="form-group">
+                            <label for="name">Ваше имя *</label>
+                            <input type="text" id="name" required placeholder="Иван Петров">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Телефон *</label>
+                            <input type="tel" id="phone" required placeholder="+7 (999) 123-45-67">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required placeholder="ivan@example.com">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Доставка</h3>
+                        <div class="form-group">
+                            <label for="address">Адрес доставки *</label>
+                            <input type="text" id="address" required placeholder="Город, улица, дом, квартира">
+                        </div>
+                        <div class="form-group">
+                            <label for="deliveryDate">Дата доставки</label>
+                            <input type="date" id="deliveryDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Комментарий к заказу</label>
+                            <textarea id="comment" rows="3" placeholder="Укажите удобное время доставки..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Способ оплаты</h3>
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="card" checked>
+                                <span>💳 Карта Мир</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="yandex">
+                                <span>🟡 Яндекс.Касса</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="halva">
+                                <span>💚 Халва (рассрочка)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Ваш заказ</h3>
+                        <div class="order-summary" id="orderSummary"></div>
+                        <div class="total-amount" id="totalAmount"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="primary-btn submit-order">
+                            <i class="fas fa-check"></i> Подтвердить заказ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно успешного заказа -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header success-header">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h2>Заказ оформлен!</h2>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="success-content">
+                    <p>Спасибо за покупку!</p>
+                    <p>Номер вашего заказа: <strong id="orderNumber">#GOSI-2026-0001</strong></p>
+                    <p>Мы отправили подтверждение на ваш email</p>
+                    <div class="delivery-info">
+                        <i class="fas fa-truck"></i>
+                        <span>Ожидаемая доставка: завтра</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="primary-btn" onclick="closeAllModals()">Продолжить покупки</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- FAQ секция - ровное расположение в две колонки -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Часто задаваемые вопросы</h2>
+            
+            <div class="faq-grid-2col">
+                <!-- Левая колонка -->
+                <div class="faq-col">
+                    <div class="faq-card">
+                        <div class="faq-number">1</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">🚚 Как быстро доставка?</h4>
+                            <p class="faq-answer">Доставка осуществляется на следующий день после заказа. Бесплатно при заказе от 1500₽. В отдаленные районы доставка 2-3 дня.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-card">
+                        <div class="faq-number">2</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">🔄 Можно ли вернуть товар?</h4>
+                            <p class="faq-answer">Да, в течение 14 дней с момента покупки, если товар не использовался. Для возврата свяжитесь с нами по телефону или в чате.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-card">
+                        <div class="faq-number">3</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">🏢 Работаете с юрлицами?</h4>
+                            <p class="faq-answer">Да, предоставляем все закрывающие документы и работаем с НДС. Для юрлиц действуют специальные условия и скидки.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Правая колонка -->
+                <div class="faq-col">
+                    <div class="faq-card">
+                        <div class="faq-number">4</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">💎 Есть скидки постоянным?</h4>
+                            <p class="faq-answer">Да, накопительная система скидок до 15% для постоянных клиентов. Также регулярно проводим акции и распродажи.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-card">
+                        <div class="faq-number">5</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">📦 Как отследить заказ?</h4>
+                            <p class="faq-answer">После отправки заказа вы получите SMS и email с трек-номером. Также можно отслеживать в личном кабинете.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-card">
+                        <div class="faq-number">6</div>
+                        <div class="faq-content">
+                            <h4 class="faq-question">🏪 Есть ли самовывоз?</h4>
+                            <p class="faq-answer">Да, можно забрать заказ из нашего магазина по адресу: Москва, ул. Пушкина, 1. Ежедневно с 9:00 до 21:00.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <a href="/" class="footer-logo">
+                        <span class="logo-gosi">GoSi</span>
+                        <span class="logo-market">Market</span>
+                    </a>
+                    <p class="footer-description">
+                        Заботимся о ваших питомцах с 2024 года. Только качественные товары и быстрая доставка.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-vk"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Покупателям</h4>
+                    <ul>
+                        <li><a href="#" onclick="showToast('📦 Как сделать заказ: добавьте товары в корзину и оформите заказ')">Как сделать заказ</a></li>
+                        <li><a href="#" onclick="showToast('🚚 Доставка бесплатно от 1500₽, оплата картой или наличными')">Доставка и оплата</a></li>
+                        <li><a href="#" onclick="showToast('🔄 Возврат товара в течение 14 дней в нашем магазине')">Возврат товара</a></li>
+                        <li><a href="#" onclick="showToast('💎 Накопительная скидка до 15% для постоянных клиентов')">Программа лояльности</a></li>
+                        <li><a href="#" onclick="showToast('🎁 Подарочные сертификаты от 500₽ в нашем магазине')">Подарочные сертификаты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Компания</h4>
+                    <ul>
+                        <li><a href="#" onclick="showToast('🏢 GoSiMarket - зоомагазин №1 с 2024 года. Заботимся о ваших питомцах!')">О нас</a></li>
+                        <li><a href="#" onclick="showToast('📰 Новости: Скоро открытие нового магазина! Следите за обновлениями')">Новости</a></li>
+                        <li><a href="#" onclick="showToast('💼 Вакансии: Требуются курьеры, продавцы и ветеринары. Звоните!')">Вакансии</a></li>
+                        <li><a href="#" onclick="showToast('🤝 Партнерам: special@gosi.market - пишите для сотрудничества')">Партнерам</a></li>
+                        <li><a href="#" onclick="showToast('📞 Контакты: 8 (800) 555-35-35, hello@gosi.market')">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> <a href="tel:88005553535">8 (800) 555-35-35</a></p>
+                        <p><i class="fas fa-envelope"></i> <a href="mailto:hello@gosi.market">hello@gosi.market</a></p>
+                        <p><i class="fas fa-clock"></i> Ежедневно 9:00-21:00</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Пушкина, 1</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2026 GoSiMarket. Все права защищены. Тестовый сайт для дальнейшей разработки.
+                </div>
+                <div class="payment-methods">
+                    <span class="payment-icon" title="Карта Мир">💳 Мир</span>
+                    <span class="payment-icon" title="Яндекс.Касса">🟡 Яндекс</span>
+                    <span class="payment-icon" title="Халва">💚 Халва</span>
+                    <span class="payment-icon" title="СБП">📱 СБП</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
